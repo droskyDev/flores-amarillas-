@@ -336,9 +336,18 @@
   });
 
   /* ---------- Canción real (archivo flores-amarillas.mp3 junto a este HTML) ---------- */
-  var song=new Audio('Floricienta___Flores_Amarillas__Letra_.mp3'); song.loop=true; song.preload='auto';
+  var song=new Audio(); song.loop=true; song.preload='auto';
+  // Busca cuál mp3 existe en el repo (acepta cualquiera de estos nombres) antes de que ella toque "Abrir"
+  var songNames=['flores-amarillas.mp3','Floricienta___Flores_Amarillas__Letra_.mp3'];
+  (function pick(i){
+    if(i>=songNames.length) return;
+    fetch(songNames[i],{method:'HEAD'}).then(function(r){
+      if(r.ok){ song.src=songNames[i]; song.load(); } else pick(i+1);
+    }).catch(function(){ pick(i+1); });
+  })(0);
   var songOn=false;
   function startSong(){
+    if(!song.getAttribute('src')){ startMusic(); return; }
     var pr; try{ pr=song.play(); }catch(e){ pr=null; }
     if(pr && pr.then){
       pr.then(function(){ songOn=true; document.getElementById('song').style.display='none'; })
