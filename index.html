@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Flores amarillas para ti 💛</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;600&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#03040b;
+    --bg2:#0b1024;
+    --gold:#ffd84a;
+    --cream:#fff4cf;
+    --muted:#cdbf8a;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    color-scheme:dark;
+  }
+  *,*::before,*::after{box-sizing:inherit}
+  html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+  html,body{margin:0;background:var(--bg)}
+  body{
+    height:100%;
+    background:radial-gradient(120% 80% at 50% 38%, var(--bg2) 0%, var(--bg) 70%);
+    color:var(--cream);
+    font-family:'Dancing Script','Snell Roundhand',cursive,Georgia,serif;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  #sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+  #app{
+    position:relative;z-index:1;height:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:18px 26px 22px;gap:6px;overflow-y:auto;overflow-x:hidden;text-align:center;
+  }
+  .kicker{
+    font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-weight:500;
+    font-size:1.05rem;letter-spacing:.06em;color:var(--muted);
+    opacity:0;transition:opacity 1.6s ease .3s;
+  }
+  body.go .kicker{opacity:1}
+
+  #bouquet{
+    width:min(76vw,330px);height:auto;max-height:52dvh;display:block;overflow:visible;
+    filter:drop-shadow(0 0 16px rgba(255,205,50,.32));
+  }
+  .halo{opacity:0}
+  .go .halo{animation:halo 5s ease-in-out 2s infinite alternate;opacity:.5}
+
+  /* Animación: el ramo se arma en una sola secuencia */
+  .paper,.bow{opacity:0}
+  .go .paper{animation:fadein 1.1s ease .2s forwards}
+  .go .bow{animation:fadein 1s ease 3.4s forwards}
+  .stem{fill:none;stroke:#3f9440;stroke-width:3.4;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1}
+  .go .stem{animation:grow 1.5s var(--d) ease-out forwards}
+  .leaf{fill:#3a8f3c;opacity:.95;transform-box:fill-box;transform-origin:0 100%;transform:scale(0)}
+  .go .leaf{animation:pop .9s var(--d) cubic-bezier(.34,1.4,.64,1) forwards}
+  .bloom{transform-box:fill-box;transform-origin:50% 100%;transform:scale(0)}
+  .go .bloom{animation:pop 1.1s var(--d) cubic-bezier(.34,1.56,.64,1) forwards}
+  .sway{transform-box:fill-box;transform-origin:50% 100%}
+  .go .sway{animation:sway 4.5s ease-in-out var(--d2) infinite alternate}
+
+  @keyframes fadein{to{opacity:1}}
+  @keyframes grow{to{stroke-dashoffset:0}}
+  @keyframes pop{to{transform:scale(1)}}
+  @keyframes sway{from{transform:rotate(-2.2deg)}to{transform:rotate(2.2deg)}}
+  @keyframes halo{from{opacity:.35;transform:scale(.96)}to{opacity:.7;transform:scale(1.04)}}
+
+  #msg{
+    margin:4px 0 0;max-width:23rem;
+    font-size:clamp(1.4rem,6vw,1.75rem);line-height:1.38;font-weight:500;color:var(--cream);
+    text-shadow:0 0 18px rgba(255,210,70,.35);
+  }
+  #msg .w{display:inline-block;white-space:nowrap}
+  #msg .c{opacity:0;transition:opacity .5s ease}
+  #msg .c.on{opacity:1}
+
+  #actions{
+    display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px;
+    opacity:0;pointer-events:none;transition:opacity 1.2s ease;
+  }
+  #actions.show{opacity:1;pointer-events:auto}
+  .pill{
+    font:inherit;font-size:1.15rem;color:var(--cream);text-decoration:none;
+    background:rgba(255,216,74,.12);border:1px solid rgba(255,216,74,.45);
+    border-radius:999px;padding:9px 18px;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .pill:active{background:rgba(255,216,74,.28)}
+  .pill:focus-visible,.mute:focus-visible,#open:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+  .mute{
+    position:fixed;z-index:5;right:14px;top:calc(env(safe-area-inset-top,0px) + 12px);
+    width:42px;height:42px;border-radius:50%;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);
+    color:var(--cream);font-size:1.15rem;line-height:1;cursor:pointer;
+    opacity:0;pointer-events:none;transition:opacity 1s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  body.go .mute{opacity:1;pointer-events:auto}
+
+  /* Pantalla inicial: el toque también desbloquea el audio en el celular */
+  #intro{
+    position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    background:radial-gradient(100% 70% at 50% 45%, #10173a 0%, #03040b 75%);
+    transition:opacity 1.1s ease, visibility 1.1s;text-align:center;padding:24px;
+  }
+  #intro.hide{opacity:0;visibility:hidden}
+  #intro .bud{font-size:3.2rem;animation:bud 2.6s ease-in-out infinite alternate}
+  #intro p{margin:0;font-size:1.9rem;color:var(--cream);text-shadow:0 0 16px rgba(255,210,70,.4)}
+  #open{
+    font:inherit;font-size:1.5rem;color:#2a1c00;background:linear-gradient(180deg,#ffe57a,#ffc61f);
+    border:0;border-radius:999px;padding:12px 34px;cursor:pointer;
+    box-shadow:0 0 28px rgba(255,205,50,.45);animation:beat 1.8s ease-in-out infinite;
+    -webkit-tap-highlight-color:transparent;
+  }
+  @keyframes bud{from{transform:translateY(0) rotate(-4deg)}to{transform:translateY(-8px) rotate(4deg)}}
+  @keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+  @media (prefers-reduced-motion:reduce){
+    .go .sway,.go .halo,#intro .bud,#open{animation:none}
+  }
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+
+<button class="mute" id="mute" aria-label="Silenciar música">♪</button>
+
+<div id="intro">
+  <div class="bud">🌷</div>
+  <p>Tengo algo para ti</p>
+  <button id="open">Abrir 💛</button>
+</div>
+
+<main id="app">
+  <div class="kicker">flores amarillas, para ti</div>
+
+  <svg id="bouquet" viewBox="0 -10 300 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ramo de tulipanes amarillos">
+    <defs>
+      <linearGradient id="petF" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fff59a"/><stop offset="1" stop-color="#ffc21f"/>
+      </linearGradient>
+      <linearGradient id="petB" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffe45c"/><stop offset="1" stop-color="#f0a90f"/>
+      </linearGradient>
+      <linearGradient id="pap" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffe6d6"/><stop offset="1" stop-color="#f1b79f"/>
+      </linearGradient>
+      <linearGradient id="pap2" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#f6c9b3"/><stop offset="1" stop-color="#ffe9dc"/>
+      </linearGradient>
+      <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#ffd44a" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#ffd44a" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <g class="halo" style="transform-box:fill-box;transform-origin:50% 50%">
+      <circle cx="150" cy="120" r="150" fill="url(#glow)"/>
+    </g>
+
+    <g id="stems"></g>
+    <g id="leaves"></g>
+    <g id="heads"></g>
+
+    <!-- Papel del ramo -->
+    <g class="paper">
+      <path d="M62,205 L150,232 L238,205 L176,398 Q150,410 124,398 Z" fill="url(#pap)"/>
+      <path d="M62,205 Q112,252 150,335 L124,398 Q94,300 62,205 Z" fill="url(#pap2)"/>
+      <path d="M238,205 Q188,252 150,335 L176,398 Q206,300 238,205 Z" fill="#fbd6c3" opacity=".85"/>
+      <path d="M150,232 L150,335" stroke="#e7a58c" stroke-width="1" opacity=".5" fill="none"/>
+      <path d="M62,205 L150,232 L238,205" stroke="#f7cdb8" stroke-width="2" fill="none"/>
+    </g>
+    <!-- Moño -->
+    <g class="bow">
+      <path d="M150,336 C108,296 88,338 104,364 C122,366 142,350 150,336 Z" fill="#f2a58e"/>
+      <path d="M150,336 C192,296 212,338 196,364 C178,366 158,350 150,336 Z" fill="#f2a58e"/>
+      <path d="M146,344 L116,404 L140,392 L152,352 Z" fill="#e88f78"/>
+      <path d="M154,344 L184,404 L160,392 L148,352 Z" fill="#e88f78"/>
+      <circle cx="150" cy="340" r="7" fill="#e07d66"/>
+    </g>
+  </svg>
+
+  <p id="msg" aria-live="polite"></p>
+
+  <div id="actions">
+    <a class="pill" id="song" href="https://www.youtube.com/results?search_query=flores+amarillas+canci%C3%B3n" target="_blank" rel="noopener">🎵 Escuchar “Flores amarillas”</a>
+  </div>
+</main>
+
+<script>
+(function(){
+  var MESSAGE = "Mi vida, no te puedo entregar físicamente tus florecitas ahora, pero quiero que sepas que aún así te tengo en mi mente, te amo preciosa más que a nadie!";
+
+  /* ---------- Ramo (SVG) ---------- */
+  var NS='http://www.w3.org/2000/svg';
+  var B=[150,335];
+  // x, y (base del tulipán), rotación, escala
+  var T=[[150,72,0,1.1],[97,100,-13,1],[203,100,13,1],[64,158,-25,.95],[236,158,25,.95],[123,138,-6,.9],[177,138,6,.9]];
+  var stems='',leaves='',heads='';
+  T.forEach(function(t,i){
+    var x=t[0],y=t[1],r=t[2],s=t[3];
+    var cx=B[0]+(x-B[0])*.35, cy=(B[1]+y)/2;
+    var d=(0.9+i*0.15).toFixed(2);
+    stems+='<path class="stem" pathLength="1" style="--d:'+d+'s" d="M'+B[0]+','+B[1]+' Q'+cx+','+cy+' '+x+','+y+'"/>';
+
+    var u=.58, px=(1-u)*(1-u)*B[0]+2*(1-u)*u*cx+u*u*x, py=(1-u)*(1-u)*B[1]+2*(1-u)*u*cy+u*u*y;
+    var side=(i%2)?1:-1, ld=(1.6+i*0.15).toFixed(2);
+    leaves+='<g transform="translate('+px.toFixed(1)+','+py.toFixed(1)+') scale('+side+',1) rotate(8)">'+
+            '<path class="leaf" style="--d:'+ld+'s" d="M0,0 C8,-10 24,-12 34,-28 C16,-30 2,-19 0,0 Z"/></g>';
+
+    var bd=(2.2+i*0.2).toFixed(2), sd=(3.4+i*0.2).toFixed(2);
+    heads+='<g transform="translate('+x+','+y+') rotate('+r+') scale('+s+')">'+
+      '<g class="sway" style="--d2:'+sd+'s"><g class="bloom" style="--d:'+bd+'s">'+
+        '<path d="M-20,-2 C-25,-30 -12,-54 0,-61 C12,-54 25,-30 20,-2 Z" fill="url(#petB)"/>'+
+        '<path d="M-22,0 C-29,-28 -17,-49 -4,-57 C-2,-37 -4,-17 6,2 C-6,8 -16,6 -22,0 Z" fill="url(#petF)"/>'+
+        '<path d="M22,0 C29,-28 17,-49 4,-57 C2,-37 4,-17 -6,2 C6,8 16,6 22,0 Z" fill="url(#petF)"/>'+
+        '<path d="M-3,-56 C-6,-36 -4,-16 0,-4" stroke="#fff8c4" stroke-width="1.6" fill="none" opacity=".55" stroke-linecap="round"/>'+
+      '</g></g></g>';
+  });
+  document.getElementById('stems').innerHTML=stems;
+  document.getElementById('leaves').innerHTML=leaves;
+  document.getElementById('heads').innerHTML=heads;
+
+  /* ---------- Mensaje (se escribe letra por letra) ---------- */
+  var msg=document.getElementById('msg'), chars=[];
+  MESSAGE.split(' ').forEach(function(word,wi,arr){
+    var w=document.createElement('span'); w.className='w';
+    for(var k=0;k<word.length;k++){
+      var c=document.createElement('span'); c.className='c'; c.textContent=word[k]; w.appendChild(c); chars.push(c);
+    }
+    msg.appendChild(w);
+    if(wi<arr.length-1) msg.appendChild(document.createTextNode(' '));
+  });
+  function typeMessage(){
+    var i=0;
+    var iv=setInterval(function(){
+      if(i>=chars.length){clearInterval(iv);document.getElementById('actions').classList.add('show');return;}
+      chars[i++].classList.add('on');
+    },48);
+  }
+
+  /* ---------- Cielo: estrellas, fugaces y luciérnagas ---------- */
+  var cv=document.getElementById('sky'), ctx=cv.getContext('2d'), W,H,dpr;
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio||1,2); W=window.innerWidth; H=window.innerHeight;
+    cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  window.addEventListener('resize',resize); resize();
+
+  var stars=[]; for(var s=0;s<120;s++) stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.3+.3,p:Math.random()*6.28,v:Math.random()*1.4+.4});
+  var shooters=[], flies=[], started=false, lastShoot=0;
+  for(var f=0;f<26;f++) flies.push(newFly(true));
+  function newFly(init){
+    return {x:Math.random()*W,y:init?Math.random()*H:H+10,vy:-(.15+Math.random()*.35),ph:Math.random()*6.28,r:Math.random()*1.8+.8,a:Math.random()*.6+.3};
+  }
+  function frame(t){
+    ctx.clearRect(0,0,W,H);
+    stars.forEach(function(st){
+      var a=.35+.65*Math.abs(Math.sin(t/1000*st.v+st.p));
+      ctx.globalAlpha=a; ctx.fillStyle='#fff';
+      ctx.beginPath(); ctx.arc(st.x*W,st.y*H,st.r,0,6.283); ctx.fill();
+    });
+    if(started){
+      if(t-lastShoot>3800+Math.random()*2500){
+        lastShoot=t; shooters.push({x:Math.random()*W*.7,y:Math.random()*H*.28,vx:6+Math.random()*3,vy:2.4+Math.random()*1.4,life:1});
+      }
+      shooters=shooters.filter(function(sh){
+        sh.x+=sh.vx; sh.y+=sh.vy; sh.life-=.016;
+        var g=ctx.createLinearGradient(sh.x,sh.y,sh.x-sh.vx*9,sh.y-sh.vy*9);
+        g.addColorStop(0,'rgba(255,255,255,'+Math.max(sh.life,0)+')'); g.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.globalAlpha=1; ctx.strokeStyle=g; ctx.lineWidth=1.6; ctx.beginPath();
+        ctx.moveTo(sh.x,sh.y); ctx.lineTo(sh.x-sh.vx*9,sh.y-sh.vy*9); ctx.stroke();
+        return sh.life>0;
+      });
+      flies.forEach(function(fl,i){
+        fl.y+=fl.vy; fl.x+=Math.sin(t/900+fl.ph)*.25;
+        if(fl.y<-10) flies[i]=newFly(false);
+        var a=fl.a*(.5+.5*Math.sin(t/500+fl.ph));
+        var gr=ctx.createRadialGradient(fl.x,fl.y,0,fl.x,fl.y,fl.r*5);
+        gr.addColorStop(0,'rgba(255,224,90,'+a+')'); gr.addColorStop(1,'rgba(255,224,90,0)');
+        ctx.globalAlpha=1; ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(fl.x,fl.y,fl.r*5,0,6.283); ctx.fill();
+      });
+    }
+    ctx.globalAlpha=1;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* ---------- Música: cajita musical generada en el navegador ---------- */
+  var ac,master,timer,step=0,nextT=0,muted=false;
+  var chords=[[261.63,329.63,392.00,523.25],[220.00,261.63,329.63,440.00],[174.61,220.00,261.63,349.23],[196.00,246.94,293.66,392.00]];
+  var mel=[[659.25,783.99],[659.25,880.00],[698.46,880.00],[587.33,783.99]];
+  var pat=[0,1,2,3,2,1,2,3];
+  function note(f,t,d,g){
+    var o=ac.createOscillator(),o2=ac.createOscillator(),e=ac.createGain(),g2=ac.createGain();
+    o.type='sine'; o.frequency.value=f; o2.type='triangle'; o2.frequency.value=f*2; g2.gain.value=.22;
+    o.connect(e); o2.connect(g2); g2.connect(e); e.connect(master);
+    e.gain.setValueAtTime(0,t); e.gain.linearRampToValueAtTime(g,t+.012); e.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.start(t); o2.start(t); o.stop(t+d+.05); o2.stop(t+d+.05);
+  }
+  function schedule(){
+    while(nextT<ac.currentTime+.6){
+      var ci=Math.floor(step/8)%4, si=step%8, ch=chords[ci];
+      if(si===0) note(ch[0]/2,nextT,1.9,.16);
+      note(ch[pat[si]],nextT,1.3,.11);
+      if(si===0||si===4) note(mel[ci][si/4],nextT,2.0,.10);
+      step++; nextT+=.44;
+    }
+  }
+  function startMusic(){
+    try{
+      ac=new (window.AudioContext||window.webkitAudioContext)();
+      master=ac.createGain(); master.gain.value=.9; master.connect(ac.destination);
+      var dl=ac.createDelay(1); dl.delayTime.value=.34; var fb=ac.createGain(); fb.gain.value=.38;
+      master.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(ac.destination);
+      if(ac.resume) ac.resume();
+      nextT=ac.currentTime+.1; timer=setInterval(schedule,120);
+    }catch(e){ document.getElementById('mute').style.display='none'; }
+  }
+  document.getElementById('mute').addEventListener('click',function(){
+    muted=!muted;
+    if(songOn) song.muted=muted;
+    else if(ac) master.gain.setTargetAtTime(muted?0:.9,ac.currentTime,.12);
+    this.textContent=muted?'✕':'♪'; this.setAttribute('aria-label',muted?'Activar música':'Silenciar música');
+  });
+  document.addEventListener('visibilitychange',function(){
+    if(songOn){ if(document.hidden) song.pause(); else song.play(); }
+    if(ac){ if(document.hidden) ac.suspend(); else ac.resume(); }
+  });
+
+  /* ---------- Canción real (archivo flores-amarillas.mp3 junto a este HTML) ---------- */
+  var song=new Audio('Floricienta___Flores_Amarillas__Letra_.mp3'); song.loop=true; song.preload='auto';
+  var songOn=false;
+  function startSong(){
+    var pr; try{ pr=song.play(); }catch(e){ pr=null; }
+    if(pr && pr.then){
+      pr.then(function(){ songOn=true; document.getElementById('song').style.display='none'; })
+        .catch(function(){ startMusic(); });
+    } else { startMusic(); }
+  }
+
+  /* ---------- Arranque ---------- */
+  document.getElementById('open').addEventListener('click',function(){
+    document.getElementById('intro').classList.add('hide');
+    startSong();
+    started=true;
+    document.body.classList.add('go');
+    setTimeout(typeMessage,3600);
+  });
+})();
+</script>
+</body>
+</html>
